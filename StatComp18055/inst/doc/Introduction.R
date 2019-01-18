@@ -1,25 +1,4 @@
----
-title: "Introduction to StatComp18055"
-author: "18055"
-date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Introduction to StatComp18055}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
----
-
-## Overview
-
-__StatComp18055__ is a simple R package which includes four R functions for the 'Statistical Computing' course: _CVM.test_ (test for equal distributions in the univariate case), _my.pcauchy_ (compute the cdf of the Cauchy distribution), _my.chisq.test_(a faster version of chisq.test() that only computes the chi-square test statistic when the input is two numeric vectors with no missing values) and _my.table_(a faster version of table() for the case of an input of two integer vectors with no missing values).
-
-The R package 'microbenchmark' can be used to benchmark the functions _my.chisq.test_ and _my.table_.
-
-
-## _CVM.test_
-
-The function CVM.test() chooses Cramer-von Mises statistic to measure the difference between two distributions and tests for equal distributions in the univariate case. The source R code for _CVM.test_ is as follows:
-```{r,eval=TRUE}
+## ----eval=TRUE-----------------------------------------------------------
 CVM.test <- function(x,y,R) {
   CVM.stat <- function(x,y) {
     n <- length(x)
@@ -45,11 +24,8 @@ CVM.test <- function(x,y,R) {
   p <- mean(c(t0, reps) >= t0)
   print(p)
 }
-```
 
-We can apply the test to the data in Examples 8.1 and 8.2(Statistical Computing with R):
-
-```{r,eval=TRUE}
+## ----eval=TRUE-----------------------------------------------------------
 # obtain data
 attach(chickwts)
 x <- sort(as.vector(weight[feed == "soybean"]))
@@ -57,15 +33,8 @@ y <- sort(as.vector(weight[feed == "linseed"]))
 detach(chickwts)
 set.seed(1)
 CVM.test(x,y,R=999)
-```
 
-The value of p we obtained is 0.421, so the null hypothesis that distributions are equal is not rejected.
-
-
-## _my.pcauchy_
-
-The function my.pcauchy() computes the cdf of the Cauchy distribution. The source R code for _my.pcauchy_ is as follows:
-```{r,eval=TRUE}
+## ----eval=TRUE-----------------------------------------------------------
 my.pcauchy <- function (x, eta, theta) {
   stopifnot(theta > 0)
   my.dcauchy <- function (x, eta, theta) {
@@ -76,11 +45,8 @@ my.pcauchy <- function (x, eta, theta) {
   }
   return(integrate(integral, lower = -Inf, upper = x, rel.tol=.Machine$double.eps^0.25)$value)
 } # the value of the integrand is the cdf of the Cauchy distribution
-```
 
-We can compare our results obtained by my.pcauchy() to the results obtained by the R function pcauchy():
-
-```{r,eval=TRUE}
+## ----eval=TRUE-----------------------------------------------------------
 # Cauchy(0,1)
 xs <- seq(-4, 5)
 names(xs) <-c(seq(-4, 5))
@@ -91,15 +57,8 @@ round(rbind(my.pcauchy=my.pcauchy.val, pcauchy=pcauchy.val), 4)
 my.pcauchy.val <- sapply(xs, function(x) my.pcauchy(x, 1, 2))
 pcauchy.val <- sapply(xs, function(x) pcauchy(x, 1, 2))
 round(rbind(my.pcauchy=my.pcauchy.val, pcauchy=pcauchy.val), 4)
-```
 
-Setting different parameters of Cauchy distribution and comparing the results obtained by my.pcauchy() to the results obtained by pcauchy(), we can clearly find that the two results are identical. So the function we write is reasonable.
-
-
-## _my.chisq.test_
-
-The function my.chisq.test() is a faster version of chisq.test() that only computes the chi-square test statistic when the input is two numeric vectors with no missing values. The source R code for _my.chisq.test_ is as follows:
-```{r,eval=TRUE}
+## ----eval=TRUE-----------------------------------------------------------
 my.chisq.test <- function(x, y) {
   total <- sum(x) + sum(y)
   rowsum_x <- sum(x)
@@ -120,17 +79,11 @@ my.chisq.test <- function(x, y) {
   }
   chistat
 } # code from the mathematical definition
-```
 
-We can apply the test to the data in Examples7.4.5(Probability Theory and Mathematical Statistics):
-
-```{r,eval=TRUE}
+## ----eval=TRUE-----------------------------------------------------------
 my.chisq.test(c(367,342,266,329),c(56,40,20,16))
-```
 
-We can compare our results obtained by my.chisq.test() to the results obtained by the R function chisq.test():
-
-```{r,eval=TRUE}
+## ----eval=TRUE-----------------------------------------------------------
 # validate the function my.chisq.test() is reasonable
 chisq.test(as.table(rbind(c(367,342,266,329),c(56,40,20,16))))
 # Validate the function my.chisq.test() is faster than chisq.test()
@@ -138,15 +91,8 @@ print(microbenchmark::microbenchmark(
   my.chisq.test = my.chisq.test(c(367,342,266,329),c(56,40,20,16)),
   chisq.test = chisq.test(as.table(rbind(c(367,342,266,329),c(56,40,20,16))))
 ))
-```
 
-From the results above, we can find that: when the input is two numeric vectors with no missing values, the function my.chisq.test() can get the same chi-squared test statistic value as chisq.test(), and my.chisq.test() only computes the chi-square test statistic. Using the microbenchmark package to compare how long each function takes to run, we can find that my.chisq.test() is obviously faster than chisq.test().
-
-
-## _my.table_
-
-The function my.table() is a faster version of table() for the case of an input of two integer vectors with no missing values. The source R code for _my.table_ is as follows:
-```{r,eval=TRUE}
+## ----eval=TRUE-----------------------------------------------------------
 my.table <- function(x, y) {
   x_unique <- unique(x) # extract unique elements of x
   y_unique <- unique(y) # extract unique elements of y
@@ -162,11 +108,8 @@ my.table <- function(x, y) {
   class(tab) <- "table"
   tab
 }
-```
 
-We can use an example to compare our results obtained by my.table() to the results obtained by the R function table():
-
-```{r,eval=TRUE}
+## ----eval=TRUE-----------------------------------------------------------
 x <- c(1, 2, 2, 3, 1, 3, 3, 2)
 y <- c(1, 1, 2, 1, 1, 1, 1, 2)
 # validate the function my.table() is reasonable
@@ -177,6 +120,4 @@ print(microbenchmark::microbenchmark(
   my.table = my.table(x, y),
   table = table(x, y)
 ))
-```
 
-From the results above, we can find that: when the input is two integer vectors with no missing values, the function my.table() can get the same contingency table as table(). Using the microbenchmark package to compare how long each function takes to run, we can find that my.table() is obviously faster than table().
